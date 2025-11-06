@@ -1,0 +1,63 @@
+clear; close all; clc;
+
+% [file,folder] = uigetfile('.xlsx','Input Spectral Datasheet');
+
+ 
+
+if exist("Spectral_Database.mat","file") == 2
+    Spectral_data = importdata("Spectral_Database.mat");
+else
+    [file,folder] = uigetfile('.xlsx','Input Spectral Datasheet');
+    Spectral_data = {};
+    Spectral = importdata(file,folder);
+    Spectral_data{1} = Spectral.data.H2O;
+    Spectral_data{2} = Spectral.data.CO2;
+    Spectral_data{3} = Spectral.data.CO;
+    save('Spectral_database.mat',"Spectral_data");
+end
+
+T = 3000;
+P = 1;
+X = 0.03;
+L = 10;
+v_start = 2004;
+v_end = 2012;
+v_step = .001;
+SimType = 'HITEMP Sim';
+Species = 3 ; %1 H20, 2 CO2, 3 CO
+
+Screensize = get(0, 'ScreenSize'); 
+W = Screensize(3); 
+H = Screensize(4);
+% make centered
+fig = uifigure('Position',[100,100,.8*W,.8*H]);
+g = uigridlayout(fig);
+g.RowHeight = {'1x','1x','25x','1x','1x'};
+g.ColumnWidth = {'1x','1x','1x','1x','1x','1x','1x','1x','1x'};
+
+b1label = uilabel(g);
+b1label.Title = "Temperature (K)";
+b1label.Layout.Row = 2;
+b1.Layout.Column = 1;
+
+b1 = uieditfield(g, 'numeric');
+b1.Value = T;
+b1.Layout.Row = 2;
+b1.Layout.Column = 1;
+
+b2 = uieditfield(g, 'numeric');
+b2.Value = P;
+b2.Layout.Row = 2;
+b2.Layout.Column = 2;
+
+ax = uiaxes(g);
+ax.Layout.Row = [3,5]; 
+ax.Layout.Column = [1,8];
+
+
+
+
+[alpha_total,W_array] = SpectralSim(Spectral_data,T,P,X,L,v_start,v_end,v_step,SimType,Species);
+
+plot (ax, W_array,alpha_total);
+

@@ -1,8 +1,7 @@
-clear; close all; clc;
+clear; close all; clc; close all hidden;
 
 % [file,folder] = uigetfile('.xlsx','Input Spectral Datasheet');
 
- 
 
 if exist("Spectral_Database.mat","file") == 2
     Spectral_data = importdata("Spectral_Database.mat");
@@ -35,16 +34,22 @@ g = uigridlayout(fig);
 g.RowHeight = {'1x','1x','25x','1x','1x'};
 g.ColumnWidth = {'1x','1x','1x','1x','1x','1x','1x','1x','1x'};
 
-% Dropdown 1
-d1label = uilabel(g);
-d1label.Text = 'Species';
-d1label.Layout.Row = 1;
-d1label.Layout.Column = 1;
+% graph axes
+ax = uiaxes(g);
+ax.Layout.Row = [3,5]; 
+ax.Layout.Column = [1,8];
 
+% Dropdown 1
 d1 = uidropdown(g);
 d1.Items = {'H2O','CO2','CO'};
+d1.Value = 'CO';
 d1.Layout.Row = 2;
 d1.Layout.Column = 1;
+
+d2 = uidropdown(g);
+d2.Items = {'HITEMP Sim', 'Non-Air Mixture Sim'};
+d2.Layout.Row = 1;
+d2.Layout.Column = 1;
 
 % Button 2 - Temperature
 b2label = uilabel(g);
@@ -123,11 +128,26 @@ b8.Value = v_step;
 b8.Layout.Row = 2;
 b8.Layout.Column = 8;
 
-ax = uiaxes(g);
-ax.Layout.Row = [3,5]; 
-ax.Layout.Column = [1,8];
+%Button 9 - Graph Changed Data
 
+b9 = uibutton(g); b9.Text = "Run Simulation";
+b9.ButtonPushedFcn = @(src,event) GraphSim(src,ax,Spectral_data,b2.Value,b3.Value,b4.Value,b5.Value,b6.Value,b7.Value,b8.Value,d2.Value,d1.ValueIndex);
+b9.Layout.Row = 2;
+b9.Layout.Column = 9;
 
-[alpha_total,W_array] = SpectralSim(Spectral_data,T,P,X,L,v_start,v_end,v_step,SimType,Species);
-
-plot (ax, W_array,alpha_total);
+function GraphSim(src,ax,Spectral_data,T,P,X,L,v_start,v_end,v_step,SimType,Species)
+    source = src.Text;
+    src.Enable = 'off';
+    src.Text = 'Plotting'; drawnow;
+    try
+    [alpha_total, W_array] = SpectralSim(Spectral_data, T, P, X, L, v_start, v_end, v_step, SimType, Species);
+    plot(ax, W_array, alpha_total);
+    xlabel(ax, 'Frequency cm-1');
+    ylabel(ax, 'Absorbance');
+    title(ax, 'Spectral Simulation');
+    hold(ax,'on');
+    display('Simulation Plotted');
+    end
+    src.Enable = 'on';
+    src.Text = source; drawnow;
+end

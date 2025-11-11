@@ -31,7 +31,7 @@ H = Screensize(4);
 % make centered
 fig = uifigure('Position',[100,100,.8*W,.8*H]);
 g = uigridlayout(fig);
-g.RowHeight = {'1x','1x','25x','1x','1x'};
+g.RowHeight = {'1x','1x','25x','1x','1x','2x'};
 g.ColumnWidth = {'1x','1x','1x','1x','1x','1x','1x','1x','1x'};
 
 % graph axes
@@ -131,11 +131,23 @@ b8.Layout.Column = 8;
 %Button 9 - Graph Changed Data
 
 b9 = uibutton(g); b9.Text = "Run Simulation";
-b9.ButtonPushedFcn = @(src,event) GraphSim(src,ax,Spectral_data,b2.Value,b3.Value,b4.Value,b5.Value,b6.Value,b7.Value,b8.Value,d2.Value,d1.ValueIndex);
+b9.ButtonPushedFcn = @(src,event) GraphSim(src,ax,Spectral_data,b2.Value,b3.Value,b4.Value,b5.Value,b6.Value,b7.Value,b8.Value,d2.Value,d1.ValueIndex,d1.Value);
 b9.Layout.Row = 2;
 b9.Layout.Column = 9;
 
-function GraphSim(src,ax,Spectral_data,T,P,X,L,v_start,v_end,v_step,SimType,Species)
+%legend
+cbox = uicheckbox(g);
+cbox.Text = 'Show';
+cbox.Layout.Row = 6;
+cbox.Layout.Column = 1;
+
+color = uicolorpicker(g,Value = "blue");
+color.Layout.Row = 6;
+color.Layout.Column = 2;
+
+
+
+function GraphSim(src,ax,Spectral_data,T,P,X,L,v_start,v_end,v_step,SimType,Species,SpeciesName)
     source = src.Text;
     src.Enable = 'off';
     src.Text = 'Plotting'; drawnow;
@@ -147,6 +159,8 @@ function GraphSim(src,ax,Spectral_data,T,P,X,L,v_start,v_end,v_step,SimType,Spec
     title(ax, 'Spectral Simulation');
     hold(ax,'on');
     display('Simulation Plotted');
+    lgd = legend(ax, sprintf( 'Species = %s | T = %.0f K | P = %.2f atm | X = %.3f | L = %.2f cm | ν_{start} = %.1f cm^{-1} | ν_{end} = %.1f cm^{-1} | step = %.4f cm^{-1} | Type = %s', ...
+    SpeciesName, T, P, X, L, v_start, v_end, v_step, SimType));
     end
     src.Enable = 'on';
     src.Text = source; drawnow;
